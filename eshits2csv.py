@@ -2,6 +2,7 @@ import argparse
 import csv
 import sys
 
+import progressbar
 from elasticsearch import Elasticsearch, helpers
 
 
@@ -10,6 +11,10 @@ def query_and_dump_reults(args):
     query = '{"query":{"match_all":{}}}'
     res = es.count(index=args.index, body=query)
     nhits = res['count']
+
+    counter = 0
+    bar = progressbar.ProgressBar(max_value=nhits)
+
     res = helpers.scan(es, index=args.index, query=query)
     fields = args.fields.split(',')
     with open(args.target, 'w') as csvfile:
@@ -18,6 +23,10 @@ def query_and_dump_reults(args):
         for item in res:
             item = item['_source']
             datawriter.writerow([item[field] for field in fields if field in item])
+
+            counter += 1
+            bar.update(counter)
+        bar.finish()
 
 
 def main(argv):
