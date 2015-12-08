@@ -10,7 +10,7 @@ def query_and_dump_reults(args):
     query = '{"query":{"match_all":{}}}'
     res = es.count(index=args.index, body=query)
     nhits = res['count']
-    res = helpers.scan(es, index=args.index, query=query, size=nhits, _source_include=args.fields)
+    res = helpers.scan(es, index=args.index, query=query)
     fields = args.fields.split(',')
     with open(args.target, 'w') as csvfile:
         datawriter = csv.writer(csvfile, delimiter=',', quotechar='"', quoting=csv.QUOTE_NONNUMERIC)
