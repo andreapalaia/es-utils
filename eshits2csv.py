@@ -6,6 +6,14 @@ import progressbar
 from elasticsearch import Elasticsearch, helpers
 
 
+def get_var(input_dict, accessor_string):
+    """Gets data from a dictionary using a dotted accessor-string"""
+    current_data = input_dict
+    for chunk in accessor_string.split('.'):
+        current_data = current_data.get(chunk, {})
+    return current_data
+
+
 def query_and_dump_reults(args):
     es = Elasticsearch([args.hostname + ':' + str(args.port)])
     query = '{"query":{"match_all":{}}}'
@@ -22,7 +30,7 @@ def query_and_dump_reults(args):
         datawriter.writerow(fields)
         for item in res:
             item = item['_source']
-            datawriter.writerow([item[field] for field in fields if field in item])
+            datawriter.writerow([get_var(item, field) for field in fields])
 
             counter += 1
             bar.update(counter)
